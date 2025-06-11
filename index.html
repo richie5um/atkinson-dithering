@@ -328,7 +328,7 @@
                 <div class="upload-icon">📷</div>
                 <div class="upload-text">Drop your image or CBZ file here or click to browse</div>
                 <div class="upload-subtext">Supports JPG, PNG, GIF, CBZ and more</div>
-                <input type="file" class="file-input" id="fileInput" accept="image/*,.cbz">
+                <input type="file" class="file-input" id="fileInput" accept="image/*,.cbz,application/x-cbz,application/vnd.comicbook+zip">
             </div>
             
             <div class="processing" id="processing">
@@ -445,9 +445,13 @@
                 this.uploadZone.addEventListener('drop', (e) => {
                     e.preventDefault();
                     this.uploadZone.classList.remove('dragover');
+                    console.log('Files dropped:', e.dataTransfer.files);
                     const file = e.dataTransfer.files[0];
                     if (file) {
+                        console.log('Processing dropped file:', file.name);
                         this.handleFileSelect(file);
+                    } else {
+                        console.log('No file in drop event');
                     }
                 });
                 
@@ -464,18 +468,24 @@
             }
             
             async handleFileSelect(file) {
-                if (!file) return;
+                if (!file) {
+                    console.log('No file selected');
+                    return;
+                }
+                
+                console.log('File selected:', file.name, file.type);
                 
                 this.currentFile = file;
                 const fileName = file.name.toLowerCase();
                 
-                if (fileName.endsWith('.cbz')) {
+                if (fileName.endsWith('.cbz') || file.type === 'application/x-cbz' || file.type === 'application/vnd.comicbook+zip') {
                     this.fileType = 'cbz';
                     await this.loadCBZFile(file);
                 } else if (file.type.startsWith('image/')) {
                     this.fileType = 'image';
                     this.loadSingleImage(file);
                 } else {
+                    console.log('Unsupported file type:', file.type);
                     alert('Please select a valid image file or CBZ archive.');
                     return;
                 }
