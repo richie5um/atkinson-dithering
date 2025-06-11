@@ -428,24 +428,43 @@
             }
             
             initEventListeners() {
+                console.log('Initializing event listeners...');
+                
                 // File input events
-                this.uploadZone.addEventListener('click', () => this.fileInput.click());
-                this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files[0]));
+                this.uploadZone.addEventListener('click', (e) => {
+                    console.log('Upload zone clicked');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.fileInput.click();
+                });
+                
+                this.fileInput.addEventListener('change', (e) => {
+                    console.log('File input changed:', e.target.files);
+                    if (e.target.files.length > 0) {
+                        this.handleFileSelect(e.target.files[0]);
+                    }
+                });
                 
                 // Drag and drop events
                 this.uploadZone.addEventListener('dragover', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Drag over');
                     this.uploadZone.classList.add('dragover');
                 });
                 
-                this.uploadZone.addEventListener('dragleave', () => {
+                this.uploadZone.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Drag leave');
                     this.uploadZone.classList.remove('dragover');
                 });
                 
                 this.uploadZone.addEventListener('drop', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Drop event:', e.dataTransfer.files);
                     this.uploadZone.classList.remove('dragover');
-                    console.log('Files dropped:', e.dataTransfer.files);
                     const file = e.dataTransfer.files[0];
                     if (file) {
                         console.log('Processing dropped file:', file.name);
@@ -453,6 +472,15 @@
                     } else {
                         console.log('No file in drop event');
                     }
+                });
+                
+                // Prevent default drag behaviors on document
+                document.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('drop', (e) => {
+                    e.preventDefault();
                 });
                 
                 // Control buttons
@@ -465,6 +493,8 @@
                 this.nextPageBtn.addEventListener('click', () => this.goToPage(this.currentPageIndex + 1));
                 this.lastPageBtn.addEventListener('click', () => this.goToPage(this.cbzImages.length - 1));
                 this.pageSlider.addEventListener('input', (e) => this.goToPage(parseInt(e.target.value) - 1));
+                
+                console.log('Event listeners initialized');
             }
             
             async handleFileSelect(file) {
