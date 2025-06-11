@@ -811,17 +811,23 @@
                             const dataUrl = this.ditheredImages.get(i);
                             const base64Data = dataUrl.split(',')[1];
                             const originalName = this.cbzImages[i].name;
-                            const extension = originalName.substring(originalName.lastIndexOf('.'));
-                            const newName = originalName.replace(extension, '_dithered.png');
                             
-                            zip.file(newName, base64Data, { base64: true });
+                            // Keep the original filename for files inside the CBZ
+                            zip.file(originalName, base64Data, { base64: true });
                         }
                     }
                     
                     const content = await zip.generateAsync({ type: 'blob' });
                     
+                    // Generate output filename from original filename
+                    const originalFileName = this.currentFile.name;
+                    const lastDotIndex = originalFileName.lastIndexOf('.');
+                    const nameWithoutExt = originalFileName.substring(0, lastDotIndex);
+                    const extension = originalFileName.substring(lastDotIndex);
+                    const outputFileName = `${nameWithoutExt}-dithered${extension}`;
+                    
                     const link = document.createElement('a');
-                    link.download = 'atkinson-dithered-comic.cbz';
+                    link.download = outputFileName;
                     link.href = URL.createObjectURL(content);
                     link.click();
                     
@@ -836,8 +842,15 @@
             
             downloadSingleImage() {
                 if (this.ditheredImages.has(this.currentPageIndex)) {
+                    // Generate output filename from original filename, preserving extension
+                    const originalFileName = this.currentFile.name;
+                    const lastDotIndex = originalFileName.lastIndexOf('.');
+                    const nameWithoutExt = originalFileName.substring(0, lastDotIndex);
+                    const extension = originalFileName.substring(lastDotIndex);
+                    const outputFileName = `${nameWithoutExt}-dithered${extension}`;
+                    
                     const link = document.createElement('a');
-                    link.download = 'atkinson-dithered-image.png';
+                    link.download = outputFileName;
                     link.href = this.ditheredImages.get(this.currentPageIndex);
                     link.click();
                 }
