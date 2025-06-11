@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atkinson Dithering Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .upload-zone {
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .upload-zone:hover {
+            border-color: #667eea;
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .upload-zone.dragover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea10, #764ba210);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #475569;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .image-container {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .image-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .image-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .image-display {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .processing {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .image-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Atkinson Dithering Tool</h1>
+            <p>Transform your images with classic Mac-style dithering</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">Drop your image here or click to browse</div>
+                <div class="upload-subtext">Supports JPG, PNG, GIF, and more</div>
+                <input type="file" class="file-input" id="fileInput" accept="image/*">
+            </div>
+            
+            <div class="processing" id="processing">
+                <div class="spinner"></div>
+                Processing your image...
+            </div>
+            
+            <div class="image-container" id="imageContainer">
+                <div class="image-grid">
+                    <div class="image-section">
+                        <div class="image-title">Original</div>
+                        <img id="originalImage" class="image-display" alt="Original">
+                    </div>
+                    <div class="image-section">
+                        <div class="image-title">Atkinson Dithered</div>
+                        <img id="ditheredImage" class="image-display" alt="Dithered">
+                    </div>
+                </div>
+                
+                <div class="controls" id="controls">
+                    <button class="btn" id="processBtn">Apply Atkinson Dithering</button>
+                    <button class="btn btn-secondary" id="downloadBtn" style="display: none;">Download Result</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AtkinsonDithering {
+            constructor() {
+                this.uploadZone = document.getElementById('uploadZone');
+                this.fileInput = document.getElementById('fileInput');
+                this.imageContainer = document.getElementById('imageContainer');
+                this.originalImage = document.getElementById('originalImage');
+                this.ditheredImage = document.getElementById('ditheredImage');
+                this.controls = document.getElementById('controls');
+                this.processBtn = document.getElementById('processBtn');
+                this.downloadBtn = document.getElementById('downloadBtn');
+                this.processing = document.getElementById('processing');
+                
+                this.originalCanvas = document.createElement('canvas');
+                this.ditheredCanvas = document.createElement('canvas');
+                this.originalCtx = this.originalCanvas.getContext('2d');
+                this.ditheredCtx = this.ditheredCanvas.getContext('2d');
+                
+                this.initEventListeners();
+            }
+            
+            initEventListeners() {
+                // File input events
+                this.uploadZone.addEventListener('click', () => this.fileInput.click());
+                this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files[0]));
+                
+                // Drag and drop events
+                this.uploadZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.uploadZone.classList.add('dragover');
+                });
+                
+                this.uploadZone.addEventListener('dragleave', () => {
+                    this.uploadZone.classList.remove('dragover');
+                });
+                
+                this.uploadZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.uploadZone.classList.remove('dragover');
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        this.handleFileSelect(file);
+                    }
+                });
+                
+                // Control buttons
+                this.processBtn.addEventListener('click', () => this.applyAtkinsonDithering());
+                this.downloadBtn.addEventListener('click', () => this.downloadImage());
+            }
+            
+            handleFileSelect(file) {
+                if (!file || !file.type.startsWith('image/')) {
+                    alert('Please select a valid image file.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.originalImage.src = e.target.result;
+                    this.originalImage.onload = () => {
+                        this.imageContainer.style.display = 'block';
+                        this.controls.style.display = 'block';
+                        this.downloadBtn.style.display = 'none';
+                        this.ditheredImage.style.display = 'none';
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            applyAtkinsonDithering() {
+                this.processing.style.display = 'block';
+                this.processBtn.disabled = true;
+                
+                // Use setTimeout to allow UI to update
+                setTimeout(() => {
+                    try {
+                        // Set up canvases
+                        this.originalCanvas.width = this.originalImage.naturalWidth;
+                        this.originalCanvas.height = this.originalImage.naturalHeight;
+                        this.ditheredCanvas.width = this.originalCanvas.width;
+                        this.ditheredCanvas.height = this.originalCanvas.height;
+                        
+                        // Draw original image to canvas
+                        this.originalCtx.drawImage(this.originalImage, 0, 0);
+                        
+                        // Get image data
+                        const imageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
+                        const data = imageData.data;
+                        const width = imageData.width;
+                        const height = imageData.height;
+                        
+                        // Apply Atkinson dithering
+                        for (let y = 0; y < height; y++) {
+                            for (let x = 0; x < width; x++) {
+                                const idx = (y * width + x) * 4;
+                                
+                                // Convert to grayscale
+                                const gray = Math.round(0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2]);
+                                
+                                // Threshold to black or white
+                                const newVal = gray > 128 ? 255 : 0;
+                                const error = gray - newVal;
+                                
+                                // Set the new pixel value
+                                data[idx] = data[idx + 1] = data[idx + 2] = newVal;
+                                
+                                // Distribute error using Atkinson dithering pattern
+                                const errorFraction = error / 8;
+                                
+                                // Atkinson dithering matrix:
+                                //     X 1 1
+                                //   1 1 1 0
+                                //     1 0 0
+                                
+                                this.distributeError(data, width, height, x + 1, y, errorFraction);
+                                this.distributeError(data, width, height, x + 2, y, errorFraction);
+                                this.distributeError(data, width, height, x - 1, y + 1, errorFraction);
+                                this.distributeError(data, width, height, x, y + 1, errorFraction);
+                                this.distributeError(data, width, height, x + 1, y + 1, errorFraction);
+                                this.distributeError(data, width, height, x, y + 2, errorFraction);
+                            }
+                        }
+                        
+                        // Put the modified image data back
+                        this.ditheredCtx.putImageData(imageData, 0, 0);
+                        
+                        // Display the result
+                        this.ditheredImage.src = this.ditheredCanvas.toDataURL();
+                        this.ditheredImage.style.display = 'block';
+                        this.downloadBtn.style.display = 'inline-block';
+                        
+                    } catch (error) {
+                        console.error('Error processing image:', error);
+                        alert('Error processing image. Please try again.');
+                    } finally {
+                        this.processing.style.display = 'none';
+                        this.processBtn.disabled = false;
+                    }
+                }, 50);
+            }
+            
+            distributeError(data, width, height, x, y, error) {
+                if (x >= 0 && x < width && y >= 0 && y < height) {
+                    const idx = (y * width + x) * 4;
+                    const newVal = Math.max(0, Math.min(255, data[idx] + error));
+                    data[idx] = data[idx + 1] = data[idx + 2] = newVal;
+                }
+            }
+            
+            downloadImage() {
+                const link = document.createElement('a');
+                link.download = 'atkinson-dithered-image.png';
+                link.href = this.ditheredCanvas.toDataURL();
+                link.click();
+            }
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new AtkinsonDithering();
+        });
+    </script>
+</body>
+</html>
