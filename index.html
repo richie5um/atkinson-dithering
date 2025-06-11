@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +23,7 @@
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
@@ -193,7 +192,7 @@
             max-height: 500px;
             height: auto;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         .image-placeholder {
@@ -288,13 +287,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
@@ -302,11 +296,11 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-
+            
             .header h1 {
                 font-size: 2rem;
             }
-
+            
             .main-content {
                 padding: 20px;
             }
@@ -322,23 +316,21 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="header">
             <h1>Atkinson Dithering Tool</h1>
             <p>Transform your images and CBZ comics with classic Mac-style dithering</p>
         </div>
-
+        
         <div class="main-content">
             <div class="upload-zone" id="uploadZone">
                 <div class="upload-icon">📷</div>
                 <div class="upload-text">Drop your image or CBZ file here or click to browse</div>
                 <div class="upload-subtext">Supports JPG, PNG, GIF, CBZ and more</div>
-                <input type="file" class="file-input" id="fileInput"
-                    accept="image/*,.cbz,application/x-cbz,application/vnd.comicbook+zip">
+                <input type="file" class="file-input" id="fileInput" accept="image/*,.cbz,application/x-cbz,application/vnd.comicbook+zip">
             </div>
-
+            
             <div class="processing" id="processing">
                 <div class="spinner"></div>
                 <span id="processingText">Processing your file...</span>
@@ -346,7 +338,7 @@
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
             </div>
-
+            
             <div class="image-container" id="imageContainer">
                 <div class="file-info" id="fileInfo">
                     <div class="file-type-badge" id="fileTypeBadge">IMAGE</div>
@@ -365,7 +357,7 @@
                         <button class="page-btn" id="lastPageBtn">⏭️</button>
                     </div>
                 </div>
-
+                
                 <div class="image-grid">
                     <div class="image-section">
                         <div class="image-title">Original</div>
@@ -378,7 +370,7 @@
                         <div id="ditheredPlaceholder" class="image-placeholder">Process image to see result</div>
                     </div>
                 </div>
-
+                
                 <div class="controls" id="controls">
                     <button class="btn" id="processBtn">Apply Atkinson Dithering</button>
                     <button class="btn btn-secondary" id="downloadBtn" style="display: none;">Download Result</button>
@@ -404,12 +396,12 @@
                 this.processing = document.getElementById('processing');
                 this.processingText = document.getElementById('processingText');
                 this.progressFill = document.getElementById('progressFill');
-
+                
                 // File info elements
                 this.fileInfo = document.getElementById('fileInfo');
                 this.fileTypeBadge = document.getElementById('fileTypeBadge');
                 this.fileDetails = document.getElementById('fileDetails');
-
+                
                 // Page navigation elements
                 this.pageNavigation = document.getElementById('pageNavigation');
                 this.firstPageBtn = document.getElementById('firstPageBtn');
@@ -419,40 +411,38 @@
                 this.pageSlider = document.getElementById('pageSlider');
                 this.currentPageSpan = document.getElementById('currentPage');
                 this.totalPagesSpan = document.getElementById('totalPages');
-
+                
                 this.originalCanvas = document.createElement('canvas');
                 this.ditheredCanvas = document.createElement('canvas');
                 this.originalCtx = this.originalCanvas.getContext('2d');
                 this.ditheredCtx = this.ditheredCanvas.getContext('2d');
-
+                
                 // File handling
                 this.currentFile = null;
                 this.fileType = null;
                 this.cbzImages = [];
                 this.currentPageIndex = 0;
                 this.ditheredImages = new Map();
-
+                
                 this.initEventListeners();
             }
-
+            
             initEventListeners() {
                 console.log('Initializing event listeners...');
-
+                
                 // File input events
                 this.uploadZone.addEventListener('click', (e) => {
                     console.log('Upload zone clicked');
-                    e.preventDefault();
-                    e.stopPropagation();
                     this.fileInput.click();
                 });
-
+                
                 this.fileInput.addEventListener('change', (e) => {
                     console.log('File input changed:', e.target.files);
                     if (e.target.files.length > 0) {
                         this.handleFileSelect(e.target.files[0]);
                     }
                 });
-
+                
                 // Drag and drop events
                 this.uploadZone.addEventListener('dragover', (e) => {
                     e.preventDefault();
@@ -460,14 +450,14 @@
                     console.log('Drag over');
                     this.uploadZone.classList.add('dragover');
                 });
-
+                
                 this.uploadZone.addEventListener('dragleave', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Drag leave');
                     this.uploadZone.classList.remove('dragover');
                 });
-
+                
                 this.uploadZone.addEventListener('drop', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -481,41 +471,41 @@
                         console.log('No file in drop event');
                     }
                 });
-
+                
                 // Prevent default drag behaviors on document
                 document.addEventListener('dragover', (e) => {
                     e.preventDefault();
                 });
-
+                
                 document.addEventListener('drop', (e) => {
                     e.preventDefault();
                 });
-
+                
                 // Control buttons
                 this.processBtn.addEventListener('click', () => this.processCurrentContent());
                 this.downloadBtn.addEventListener('click', () => this.downloadResult());
-
+                
                 // Page navigation
                 this.firstPageBtn.addEventListener('click', () => this.goToPage(0));
                 this.prevPageBtn.addEventListener('click', () => this.goToPage(this.currentPageIndex - 1));
                 this.nextPageBtn.addEventListener('click', () => this.goToPage(this.currentPageIndex + 1));
                 this.lastPageBtn.addEventListener('click', () => this.goToPage(this.cbzImages.length - 1));
                 this.pageSlider.addEventListener('input', (e) => this.goToPage(parseInt(e.target.value) - 1));
-
+                
                 console.log('Event listeners initialized');
             }
-
+            
             async handleFileSelect(file) {
                 if (!file) {
                     console.log('No file selected');
                     return;
                 }
-
+                
                 console.log('File selected:', file.name, file.type);
-
+                
                 this.currentFile = file;
                 const fileName = file.name.toLowerCase();
-
+                
                 if (fileName.endsWith('.cbz') || file.type === 'application/x-cbz' || file.type === 'application/vnd.comicbook+zip') {
                     this.fileType = 'cbz';
                     await this.loadCBZFile(file);
@@ -528,17 +518,17 @@
                     return;
                 }
             }
-
+            
             async loadCBZFile(file) {
                 this.showProcessing('Loading CBZ file...');
-
+                
                 try {
-                    const zip = new JSZip();
+                    const zip = new window.JSZip();
                     const contents = await zip.loadAsync(file);
-
+                    
                     const imageFiles = [];
                     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
-
+                    
                     contents.forEach((relativePath, zipEntry) => {
                         const extension = relativePath.toLowerCase().substring(relativePath.lastIndexOf('.'));
                         if (imageExtensions.includes(extension) && !zipEntry.dir) {
@@ -548,36 +538,36 @@
                             });
                         }
                     });
-
+                    
                     // Sort files naturally
                     imageFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-
+                    
                     this.cbzImages = [];
                     this.ditheredImages.clear();
-
+                    
                     for (let i = 0; i < imageFiles.length; i++) {
                         this.updateProgress((i / imageFiles.length) * 100, `Loading image ${i + 1} of ${imageFiles.length}...`);
-
+                        
                         const imageData = await imageFiles[i].entry.async('blob');
                         const imageUrl = URL.createObjectURL(imageData);
-
+                        
                         this.cbzImages.push({
                             name: imageFiles[i].name,
                             url: imageUrl,
                             processed: false
                         });
                     }
-
+                    
                     this.hideProcessing();
                     this.setupCBZInterface();
-
+                    
                 } catch (error) {
                     console.error('Error loading CBZ file:', error);
                     alert('Error loading CBZ file. Please make sure it\'s a valid comic book archive.');
                     this.hideProcessing();
                 }
             }
-
+            
             loadSingleImage(file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -591,47 +581,47 @@
                 };
                 reader.readAsDataURL(file);
             }
-
+            
             setupCBZInterface() {
                 this.fileTypeBadge.textContent = 'CBZ COMIC';
                 this.fileDetails.textContent = `${this.cbzImages.length} pages`;
-
+                
                 this.pageNavigation.style.display = 'block';
                 this.totalPagesSpan.textContent = this.cbzImages.length;
                 this.pageSlider.max = this.cbzImages.length;
-
+                
                 this.currentPageIndex = 0;
                 this.displayCurrentPage();
                 this.updatePageNavigation();
-
+                
                 this.imageContainer.style.display = 'block';
                 this.controls.style.display = 'block';
                 this.downloadBtn.style.display = 'none';
             }
-
+            
             setupImageInterface() {
                 this.fileTypeBadge.textContent = 'IMAGE';
                 this.fileDetails.textContent = '1 image';
-
+                
                 this.pageNavigation.style.display = 'none';
                 this.currentPageIndex = 0;
                 this.displayCurrentPage();
-
+                
                 this.imageContainer.style.display = 'block';
                 this.controls.style.display = 'block';
                 this.downloadBtn.style.display = 'none';
             }
-
+            
             displayCurrentPage() {
                 if (this.cbzImages.length === 0) return;
-
+                
                 const currentImage = this.cbzImages[this.currentPageIndex];
-
+                
                 // Show original image
                 this.originalImage.src = currentImage.url;
                 this.originalImage.style.display = 'block';
                 this.originalPlaceholder.style.display = 'none';
-
+                
                 // Show dithered image if available
                 if (this.ditheredImages.has(this.currentPageIndex)) {
                     this.ditheredImage.src = this.ditheredImages.get(this.currentPageIndex);
@@ -645,25 +635,25 @@
                     this.downloadBtn.style.display = 'none';
                 }
             }
-
+            
             goToPage(pageIndex) {
                 if (pageIndex < 0 || pageIndex >= this.cbzImages.length) return;
-
+                
                 this.currentPageIndex = pageIndex;
                 this.displayCurrentPage();
                 this.updatePageNavigation();
             }
-
+            
             updatePageNavigation() {
                 this.currentPageSpan.textContent = this.currentPageIndex + 1;
                 this.pageSlider.value = this.currentPageIndex + 1;
-
+                
                 this.firstPageBtn.disabled = this.currentPageIndex === 0;
                 this.prevPageBtn.disabled = this.currentPageIndex === 0;
                 this.nextPageBtn.disabled = this.currentPageIndex === this.cbzImages.length - 1;
                 this.lastPageBtn.disabled = this.currentPageIndex === this.cbzImages.length - 1;
             }
-
+            
             async processCurrentContent() {
                 if (this.fileType === 'cbz') {
                     await this.processAllCBZPages();
@@ -671,26 +661,31 @@
                     await this.processSingleImage();
                 }
             }
-
+            
             async processAllCBZPages() {
                 this.showProcessing('Processing CBZ pages...');
                 this.processBtn.disabled = true;
-
+                
                 try {
                     for (let i = 0; i < this.cbzImages.length; i++) {
                         this.updateProgress((i / this.cbzImages.length) * 100, `Processing page ${i + 1} of ${this.cbzImages.length}...`);
-
+                        
                         const ditheredDataUrl = await this.applyAtkinsonDithering(this.cbzImages[i].url);
                         this.ditheredImages.set(i, ditheredDataUrl);
                         this.cbzImages[i].processed = true;
-
+                        
+                        // Update preview if this is the current page
+                        if (i === this.currentPageIndex) {
+                            this.updateCurrentPagePreview();
+                        }
+                        
                         // Small delay to prevent browser freezing
                         await new Promise(resolve => setTimeout(resolve, 10));
                     }
-
+                    
                     this.hideProcessing();
                     this.displayCurrentPage();
-
+                    
                 } catch (error) {
                     console.error('Error processing CBZ:', error);
                     alert('Error processing CBZ file. Please try again.');
@@ -699,19 +694,19 @@
                     this.processBtn.disabled = false;
                 }
             }
-
+            
             async processSingleImage() {
                 this.showProcessing('Processing image...');
                 this.processBtn.disabled = true;
-
+                
                 try {
                     const ditheredDataUrl = await this.applyAtkinsonDithering(this.cbzImages[0].url);
                     this.ditheredImages.set(0, ditheredDataUrl);
                     this.cbzImages[0].processed = true;
-
+                    
                     this.hideProcessing();
                     this.displayCurrentPage();
-
+                    
                 } catch (error) {
                     console.error('Error processing image:', error);
                     alert('Error processing image. Please try again.');
@@ -720,7 +715,7 @@
                     this.processBtn.disabled = false;
                 }
             }
-
+            
             async applyAtkinsonDithering(imageUrl) {
                 return new Promise((resolve, reject) => {
                     const img = new Image();
@@ -731,39 +726,39 @@
                             this.originalCanvas.height = img.naturalHeight;
                             this.ditheredCanvas.width = this.originalCanvas.width;
                             this.ditheredCanvas.height = this.originalCanvas.height;
-
+                            
                             // Draw original image to canvas
                             this.originalCtx.drawImage(img, 0, 0);
-
+                            
                             // Get image data
                             const imageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
                             const data = imageData.data;
                             const width = imageData.width;
                             const height = imageData.height;
-
+                            
                             // Apply Atkinson dithering
                             for (let y = 0; y < height; y++) {
                                 for (let x = 0; x < width; x++) {
                                     const idx = (y * width + x) * 4;
-
+                                    
                                     // Convert to grayscale
                                     const gray = Math.round(0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2]);
-
+                                    
                                     // Threshold to black or white
                                     const newVal = gray > 128 ? 255 : 0;
                                     const error = gray - newVal;
-
+                                    
                                     // Set the new pixel value
                                     data[idx] = data[idx + 1] = data[idx + 2] = newVal;
-
+                                    
                                     // Distribute error using Atkinson dithering pattern
                                     const errorFraction = error / 8;
-
+                                    
                                     // Atkinson dithering matrix:
                                     //     X 1 1
                                     //   1 1 1 0
                                     //     1 0 0
-
+                                    
                                     this.distributeError(data, width, height, x + 1, y, errorFraction);
                                     this.distributeError(data, width, height, x + 2, y, errorFraction);
                                     this.distributeError(data, width, height, x - 1, y + 1, errorFraction);
@@ -772,12 +767,12 @@
                                     this.distributeError(data, width, height, x, y + 2, errorFraction);
                                 }
                             }
-
+                            
                             // Put the modified image data back
                             this.ditheredCtx.putImageData(imageData, 0, 0);
-
+                            
                             resolve(this.ditheredCanvas.toDataURL());
-
+                            
                         } catch (error) {
                             reject(error);
                         }
@@ -786,7 +781,7 @@
                     img.src = imageUrl;
                 });
             }
-
+            
             distributeError(data, width, height, x, y, error) {
                 if (x >= 0 && x < width && y >= 0 && y < height) {
                     const idx = (y * width + x) * 4;
@@ -794,7 +789,7 @@
                     data[idx] = data[idx + 1] = data[idx + 2] = newVal;
                 }
             }
-
+            
             async downloadResult() {
                 if (this.fileType === 'cbz') {
                     await this.downloadProcessedCBZ();
@@ -802,43 +797,43 @@
                     this.downloadSingleImage();
                 }
             }
-
+            
             async downloadProcessedCBZ() {
                 this.showProcessing('Creating CBZ file...');
-
+                
                 try {
-                    const zip = new JSZip();
-
+                    const zip = new window.JSZip();
+                    
                     for (let i = 0; i < this.cbzImages.length; i++) {
                         this.updateProgress((i / this.cbzImages.length) * 100, `Adding page ${i + 1} to archive...`);
-
+                        
                         if (this.ditheredImages.has(i)) {
                             const dataUrl = this.ditheredImages.get(i);
                             const base64Data = dataUrl.split(',')[1];
                             const originalName = this.cbzImages[i].name;
                             const extension = originalName.substring(originalName.lastIndexOf('.'));
                             const newName = originalName.replace(extension, '_dithered.png');
-
+                            
                             zip.file(newName, base64Data, { base64: true });
                         }
                     }
-
+                    
                     const content = await zip.generateAsync({ type: 'blob' });
-
+                    
                     const link = document.createElement('a');
                     link.download = 'atkinson-dithered-comic.cbz';
                     link.href = URL.createObjectURL(content);
                     link.click();
-
+                    
                     this.hideProcessing();
-
+                    
                 } catch (error) {
                     console.error('Error creating CBZ:', error);
                     alert('Error creating CBZ file. Please try again.');
                     this.hideProcessing();
                 }
             }
-
+            
             downloadSingleImage() {
                 if (this.ditheredImages.has(this.currentPageIndex)) {
                     const link = document.createElement('a');
@@ -847,26 +842,36 @@
                     link.click();
                 }
             }
-
+            
             showProcessing(text) {
                 this.processing.style.display = 'block';
                 this.processingText.textContent = text;
                 this.progressFill.style.width = '0%';
             }
-
+            
             hideProcessing() {
                 this.processing.style.display = 'none';
             }
-
+            
+            updateCurrentPagePreview() {
+                if (this.ditheredImages.has(this.currentPageIndex)) {
+                    this.ditheredImage.src = this.ditheredImages.get(this.currentPageIndex);
+                    this.ditheredImage.style.display = 'block';
+                    this.ditheredPlaceholder.style.display = 'none';
+                    this.downloadBtn.style.display = 'inline-block';
+                }
+            }
+            
             updateProgress(percent, text) {
                 this.progressFill.style.width = `${percent}%`;
                 this.processingText.textContent = text;
             }
         }
-
+        
         // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
             new AtkinsonDithering();
         });
     </script>
 </body>
+</html>
